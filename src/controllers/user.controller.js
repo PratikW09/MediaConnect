@@ -33,9 +33,10 @@ const registerUser = asyncHandler( async (req,res) => {
     if(existedUser){
         throw new ApiError(409,"User with email or username already exits");
     }
-
-    const avatarLocalPath = await req.files?.avatar[0]?.path;
-    const coverImageLocalPath = await req.files?.coverImage[0]?.path;
+    console.log(req.files);
+    const avatarLocalPath =  req.files?.avatar[0]?.path;
+    const coverImageLocalPath =  req.files?.coverImage[0]?.path;
+    console.log(avatarLocalPath);
 
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file is required");
@@ -43,7 +44,6 @@ const registerUser = asyncHandler( async (req,res) => {
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-
     if(!avatar){
         throw new ApiError(400,"avtar file is required from cluidnary");
 
@@ -55,7 +55,7 @@ const registerUser = asyncHandler( async (req,res) => {
         email,
         password,
         avatar : avatar.url,
-        coverImage : coverImage?.url||"",
+        coverImage :coverImage?.url || "" ,
          
     })
 
