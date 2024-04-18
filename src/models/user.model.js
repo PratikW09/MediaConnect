@@ -60,48 +60,58 @@ const userSchema = new Schema
 })
 
 
-userSchema.pre("save", function async(next) {
-    // password should hash only when thier is chnage in password
-    if(this.isModified("password")){
-        this.password =  bcrypt.hash(this.password, 10);
-        next();
-    }
-    else return next();
-})
+// userSchema.pre("save", async function(next) {
+//     // password should hash only when there is a change in password
+//     if (this.isModified("password")) {
+//         try {
+//             this.password = await bcrypt.hash(this.password, 10);
+//             next();
+//         } catch (error) {
+//             next(error); // Pass the error to the next middleware
+//         }
+//     } else {
+//         next(); // Move to the next middleware if password is not modified
+//     }
+// });
 
-userSchema.methods.isPasswordCorrect = async function
-(password){
-    return await bcrypt.compare(password,this.password);
-}
+// userSchema.methods.isPasswordCorrect = async function(password) {
+//     try {
+//         return await bcrypt.compare(password, this.password);
+//     } catch (error) {
+//         // Handle the error, you can log it or return false depending on your application's requirements
+//         console.error("Error comparing passwords:", error);
+//         return false; // Return false indicating password comparison failure
+//     }
+// }
 
 
-userSchema.methods.genrateAccessToken = function(){
-    jwt.sign(
-        {
-        _id : this._id,
-        email : this.email,
-        username : this.username,
-        fullName : this.fullName
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-            expiresIn : process.env.ACCESS_TOKEN_EXPIRY
-        }
-    )
+// userSchema.methods.genrateAccessToken = function(){
+//     jwt.sign(
+//         {
+//         _id : this._id,
+//         email : this.email,
+//         username : this.username,
+//         fullName : this.fullName
+//         },
+//         process.env.ACCESS_TOKEN_SECRET,
+//         {
+//             expiresIn : process.env.ACCESS_TOKEN_EXPIRY
+//         }
+//     )
 
-}
-userSchema.methods.genrateRefreshToken = function()
-{
-    jwt.sign(
-        {
-        _id : this._id,
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-            expiresIn : process.env.REFRESH_TOKEN_EXPIRY
-        }
-    )
-}
+// }
+// userSchema.methods.genrateRefreshToken = function()
+// {
+//     jwt.sign(
+//         {
+//         _id : this._id,
+//         },
+//         process.env.REFRESH_TOKEN_SECRET,
+//         {
+//             expiresIn : process.env.REFRESH_TOKEN_EXPIRY
+//         }
+//     )
+// }
 
 
 export const User = mongoose.model("User",userSchema);
