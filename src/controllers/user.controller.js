@@ -4,6 +4,7 @@ import {User} from "../models/user.model.js"
 import { uploadOnCloudinary } from '../utils/FileUpload.js';
 import {ApiRespose} from "../utils/ApiResponse.js"
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken";
 import { generateAccessToken, genrateRefreshToken } from '../utils/genrateToken.js';
 
 const generateAccessAndRefreshToken = async(userId)=>{
@@ -99,13 +100,13 @@ const registerUser = asyncHandler( async (req,res) => {
     if(!createdUser){
         throw new ApiError(500,"Something went wrong while registering the user")
     }
-    // const option ={
-    //     httpOnly:true,
-    //     secure:true
-    // }
+    const option ={
+        httpOnly:true,
+        secure:true
+    }
     return res.status(201)
-    // .cookie("accessToken",accessToken,option)
-    // .cookie("refreshToken",refreshToken,option)
+    .cookie("accessToken",accessToken,option)
+    .cookie("refreshToken",refreshToken,option)
     .json(
         new ApiRespose(200,
             {
@@ -180,12 +181,12 @@ const loginUser = asyncHandler(async (req,res)=>{
 
 
 const logoutUser = asyncHandler(async(req,res)=>{
-    console.log(req.user);
+    // console.log(req.user);
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken:undefined
+            $unset: {
+                refreshToken: 1 // this removes the field from document
             }
         },
         {
@@ -280,7 +281,7 @@ const changeCurrentPassword = asyncHandler(async(req,res)=>{
 const getCurrentUser = asyncHandler(async(req,res)=>{
     return res
     .status(200)
-    .json(ApiRespose(200,req.user,"Current user fetched Successfully"))
+    .json(new  ApiRespose(200,req.user,"Current user fetched Successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async(req,res)=>{
