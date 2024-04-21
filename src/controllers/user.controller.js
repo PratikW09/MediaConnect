@@ -1,6 +1,7 @@
 import {asyncHandler} from '../utils/asyncHandler.js';
 import {ApiError} from "../utils/ApiError.js";
-import {User} from "../models/user.model.js"
+import {User} from "../models/user.model.js";
+import {Subscription} from "../models/subscription.model.js";
 import { uploadOnCloudinary } from '../utils/FileUpload.js';
 import {ApiRespose} from "../utils/ApiResponse.js"
 import bcrypt from "bcrypt"
@@ -444,7 +445,81 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{
 })
 
 
+const subscribeToChannel = asyncHandler(async (req, res) => {
+    const { username } = req.params;
 
+    if (!req.user) {
+        throw new ApiError(401, "Unauthorized user");
+    }
+
+  
+    if (!username || !username.trim()) {
+        throw new ApiError(400, "Username is missing");
+    }
+
+
+    const channel = await User.findOne({ username: username.toLowerCase() });
+    if (!channel) {
+        throw new ApiError(404, "Channel not found");
+    }
+
+    const existingSubscription = await Subscription.findOne({
+        channel: channel._id,
+        subscriber: req.user._id
+    });
+    if (existingSubscription) {
+        throw new ApiError(400, "User is already subscribed to this channel");
+    }
+
+    const newSubscription = new Subscription({
+        channel: channel._id,
+        subscriber: req.user._id
+    });
+    await newSubscription.save();
+
+    
+
+    // Return success response
+    return res
+    .status(200)
+    .json(new ApiRespose(200, null, "Subscribed to channel successfully"));
+});
+
+
+const unsubscribeFromChannel = asyncHandler(async (req, res) => {
+    const { username } = req.params;
+
+    // Check if the user is authenticated
+    if (!req.user) {
+        throw new ApiError(401, "Unauthorized user");
+    }
+
+    // Check if the username is provided
+    if (!username || !username.trim()) {
+        throw new ApiError(400, "Username is missing");
+    }
+
+    // Find the channel by username
+    const channel = await User.findOne({ username: username.toLowerCase() });
+    if (!channel) {
+        throw new ApiError(404, "Channel not found");
+    }
+
+    // Check if the user is subscribed to the channel
+    const subscription = await Subscription.findOneAndDelete({
+        channel: channel._id,
+        subscriber: req.user._id
+    });
+    if (!subscription) {
+        throw new ApiError(400, "User is not subscribed to this channel");
+    }
+
+    // Decrement the subscriber count of the channel
+    // await User.findByIdAndUpdate(channel._id, { $inc: { subscribersCount: -1 } });
+
+    // Return success response
+    return res.status(200).json(new ApiRespose(200, null, "Unsubscribed from channel successfully"));
+});
 export {
     registerUser,
     loginUser,
@@ -455,6 +530,8 @@ export {
     updateAccountDetails,
     updateAvatar,
     updateCoverImage,
-    getUserChannelProfile
+    getUserChannelProfile,
+    subscribeToChannel,
+    unsubscribeFromChannel
 };
 

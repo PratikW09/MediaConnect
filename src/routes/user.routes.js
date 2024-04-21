@@ -1,7 +1,7 @@
 import express from 'express';
 // import multer from 'multer';
 // import path from 'path';
-import { changeCurrentPassword, getCurrentUser, getUserChannelProfile, loginUser, logoutUser, refreshAccessToken, registerUser, updateAccountDetails, updateAvatar, updateCoverImage } from '../controllers/user.controller.js';
+import { changeCurrentPassword, getCurrentUser, getUserChannelProfile, loginUser, logoutUser, refreshAccessToken, registerUser, subscribeToChannel, unsubscribeFromChannel, updateAccountDetails, updateAvatar, updateCoverImage } from '../controllers/user.controller.js';
 import upload from "../middlewares/multer.middleware.js"
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 const  router = express.Router();
@@ -34,7 +34,8 @@ router.route("/update-account").patch(verifyJWT,updateAccountDetails)
 router.route("/update-avatar").patch(verifyJWT,upload.single("avatar"),updateAvatar)
 router.route("/update-cover-image").patch(verifyJWT,upload.single("coverImage"),updateCoverImage)
 router.route("/channel/:username").get(verifyJWT,getUserChannelProfile)
-
+router.route("/channels/:username/subscribe").post(verifyJWT,subscribeToChannel);
+router.route("/channels/:username/unsubscribe").post(verifyJWT,unsubscribeFromChannel);
 
 
 
