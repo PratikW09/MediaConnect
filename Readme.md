@@ -38,7 +38,7 @@ MediaConnect is a backend platform for a video streaming application designed to
 ```bash
 git clone https://github.com/PratikW09/MediaConnect.git
 cd MediaConnect
-npm start
+npm run dev
 ```
 ---
 Your backend will now be running at http://localhost:5000.
