@@ -1,6 +1,7 @@
 import {asyncHandler} from '../utils/asyncHandler.js';
 import {ApiError} from "../utils/ApiError.js";
 import {User} from "../models/user.model.js";
+import { Video } from "../models/video.model.js";
 import {Subscription} from "../models/subscription.model.js";
 import { uploadOnCloudinary } from '../utils/FileUpload.js';
 import {ApiRespose} from "../utils/ApiResponse.js"
@@ -26,6 +27,38 @@ const generateAccessAndRefreshToken = async(userId)=>{
 
 }
 
+const uploadVideo = async (req, res) => {
+    try {
+      const { title, description } = req.body;
+  
+      // Check if the video file was uploaded
+      if (!req.file || !req.file.path) {
+        return res.status(400).json({ message: "Video upload failed. Please try again." });
+      }
+  
+      // Create a new video document
+      const newVideo = new Video({
+        videoFile: req.file.path, // Cloudinary URL for the uploaded video
+        thumbnail: req.body.thumbnail || "", // Optional thumbnail if provided
+        title, // Video title from the request body
+        description, // Video description from the request body
+        duration: Number(duration), // Video duration (should be provided in seconds)
+        owner: req.user._id, // Owner's ID (the authenticated user uploading the video)
+      });
+  
+      // Save the new video to the database
+      await newVideo.save();
+  
+      // Respond with success and the video data
+      res.status(201).json({
+        message: "Video uploaded successfully!",
+        video: newVideo,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to upload video.", error: error.message });
+    }
+  };
 
 const registerUser = asyncHandler( async (req,res) => {
     /*
@@ -131,6 +164,7 @@ const loginUser = asyncHandler(async (req,res)=>{
     // if(!username || !email){
     //     throw new ApiError(400,"username or email is required");
     // }
+    // console.log(req.body);
 
     if(!(username || email)){
         throw new ApiError(400,"username or email is required")
@@ -532,6 +566,7 @@ export {
     updateCoverImage,
     getUserChannelProfile,
     subscribeToChannel,
-    unsubscribeFromChannel
+    unsubscribeFromChannel,
+    uploadVideo
 };
 

@@ -14,7 +14,8 @@ app.use(express.urlencoded({extended:true,limit :"16kb"}));
 app.use(express.static("publlic"));
 app.use(cookieParser());
 
-
+// OD0ZlHQ5TEKO55YX
+// walalepratik09
 // routes import
 import router from "./routes/user.routes.js";
 // routes declration
